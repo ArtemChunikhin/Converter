@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Converter
 {
@@ -28,11 +24,11 @@ namespace Converter
                 case 1:
                     throw new Exception();
                 case 2:
-                    return value * eur;
+                    return value / eur;
                 case 3:
-                    return value * usd;
+                    return value / usd;
                 case 4:
-                    return value * rub;
+                    return value / rub;
             }
             throw new Exception();
         }
@@ -41,66 +37,133 @@ namespace Converter
             switch (convertTo)
             {
                 case 1:
-                    Double usdToUah = 1 / usd;
-                    return value * usdToUah;
+                    return value * usd;
                 case 2:
-                    Double usdToEur = (value * usd) / eur;
-                    return usdToEur;
+                    return (value * usd) / eur;
                 case 3:
                     throw new Exception();
                 case 4:
-                    Double usdToRub = (value * usd) / rub;
-                    return usdToRub;
+                    return (value * usd) / rub;
             }
             throw new Exception();
 
+        }
+        public Double ConvertEUR(Double value, Int32 convertTo)
+        {
+            switch (convertTo)
+            {
+                case 1:
+                    return value * eur;
+                case 2:
+                    throw new Exception();
+                case 3:
+                    return (value * eur) / usd;
+                case 4:
+                    return (value * eur) / rub;
+            }
+            throw new Exception();
+        }
+        public Double ConvertRUB(Double value, Int32 convertTo)
+        {
+            switch (convertTo)
+            {
+                case 1:
+                    return value * rub;
+                case 2:
+                    return (value * rub) / usd;
+                case 3:
+                    return (value * rub) / usd;
+                case 4:
+                    throw new Exception();
+            }
+            throw new Exception();
         }
     }
 
     internal class UserInterface
     {
         private Int32 intCheck;
-        private Int32 a;
-        public Int32 Input(out Int32 currency, out Int32 convertToCurrency)
+        private Double doubleCheck;
+        public Int32 Input(out Int32 currency, out Int32 convertToCurrency,
+                            out Double usd, out Double eur, out Double rub)
         {
-            Console.Write("Enter value: ");
-            if (Int32.TryParse(Console.ReadLine(), out intCheck))
+            Console.Write("Enter currency usd to uah: ");
+            if (Double.TryParse(Console.ReadLine(), out doubleCheck))
             {
-                Int32 valueMoney = intCheck;
-                Console.WriteLine("UAH - 1| EUR - 2| USD - 3| RUB - 4");
-                if (Int32.TryParse(Console.ReadLine(), out intCheck))
+                usd = doubleCheck;
+                Console.Write("Enter currency eur to uah: ");
+                if (Double.TryParse(Console.ReadLine(), out doubleCheck))
                 {
-                    currency = intCheck;
-                    Console.WriteLine("Will convert to: UAH - 1| EUR - 2| USD - 3| RUB - 4");
-                    if (Int32.TryParse(Console.ReadLine(), out intCheck))
+                    eur = doubleCheck;
+                    Console.Write("Enter currency rub to uah: ");
+                    if (Double.TryParse(Console.ReadLine(), out doubleCheck))
                     {
-                        convertToCurrency = intCheck;
-                        return valueMoney;
+                        rub = doubleCheck;
+                        Console.Write("Enter value: ");
+                        if (Int32.TryParse(Console.ReadLine(), out intCheck))
+                        {
+                            Int32 valueMoney = intCheck;
+                            Console.WriteLine("UAH - 1| EUR - 2| USD - 3| RUB - 4");
+                            if (Int32.TryParse(Console.ReadLine(), out intCheck))
+                            {
+                                currency = intCheck;
+                                Console.WriteLine("Will convert to: UAH - 1| EUR - 2| USD - 3| RUB - 4");
+                                if (Int32.TryParse(Console.ReadLine(), out intCheck))
+                                {
+                                    convertToCurrency = intCheck;
+                                    return valueMoney;
 
+                                }
+                            }
+
+                        }
                     }
                 }
+
             }
             throw new Exception();
         }
-    }
-        class Program
+        public void Output(Double convertedValue)
         {
-            private static Int32 valueMoney;
-            private static Int32 currency;
-            private static Int32 convertToCurrency;
-            static void Main(string[] args)
-            {
-                UserInterface ui = new UserInterface();
-                valueMoney = ui.Input(out currency, out convertToCurrency);
-            Converter converter = new Converter();
-            switch (currency)
-            {
-                case 1:
-                    converter.ConvertUAH(valueMoney, convertToCurrency);
-                    break;
-            }
-
-                
-            }
+            Console.WriteLine("result {0}", convertedValue);
         }
     }
+    class Program
+    {
+        private static Int32 valueMoney;
+        private static Int32 currency;
+        private static Int32 convertToCurrency;
+        private static Double usd;
+        private static Double eur;
+        private static Double rub;
+
+        static void Main(string[] args)
+        {
+            try
+            {
+
+                UserInterface ui = new UserInterface();
+                valueMoney = ui.Input(out currency, out convertToCurrency, out usd, out eur, out rub);
+                Converter converter = new Converter(usd, eur, rub);
+                switch (currency)
+                {
+                    case 1:
+                        ui.Output(converter.ConvertUAH(valueMoney, convertToCurrency));
+                        break;
+                    case 2:
+                        ui.Output(converter.ConvertEUR(valueMoney, convertToCurrency));
+                        break;
+                    case 3:
+                        ui.Output(converter.ConvertUSD(valueMoney, convertToCurrency));
+                        break;
+                    case 4:
+                        ui.Output(converter.ConvertRUB(valueMoney, convertToCurrency));
+                        break;
+                    default:
+                        break;
+                }
+            }
+            catch (Exception) { }
+        }
+    }
+}
